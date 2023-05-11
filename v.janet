@@ -66,4 +66,4 @@
                   ;(v* (normalize [x-diff y-diff]) [speed speed]))))
 
 (test
- (vector-to [0 0] [1 1] 1) @[-0.707107 -0.707107])
+ (do (def [x y] (vector-to [0 0] [3 4] 5)) [x y]) [-3 -4])

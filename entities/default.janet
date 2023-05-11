@@ -10,7 +10,7 @@
     :position @[10 10]
     :velocity @[1.0 0.1]
     :draw (fn [self] (jaylib/draw-text (self :type) ;(map math/round (self :position)) 12 :green))
-    :update (fn [self]
+    :update (fn [self state]
               # (pp self)
               # (pp (self :position))
               # (pp (self :velocity))
@@ -20,3 +20,7 @@
     #                       (filter (state :entities)
     #                               (fn [e] (not= (self :id) (e :id))))))
    })
+
+
+
+(test 1 1)

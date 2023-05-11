@@ -17,7 +17,7 @@
      height
      :blue)))
 
-(defn update [player]
+(defn update [player _state]
   (when (jaylib/key-down? :up   ) (v/v-= (player :velocity) [0 (player :accel)]))
   (when (jaylib/key-down? :down ) (v/v+= (player :velocity) [0 (player :accel)]))
   (when (jaylib/key-down? :left ) (v/v-= (player :velocity) [(player :accel) 0]))
@@ -47,7 +47,7 @@
   (-> @{:type "player"
         :width 20
         :height 34
-        :accel 0.5
+        :accel 0.45
         :max-velocity @[3 3.5]
         :friction @[0.95 0.95]
         :position @[(/ config/screen-width 2)
