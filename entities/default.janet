@@ -9,12 +9,11 @@
     :id (++ id)
     :position @[10 10]
     :velocity @[1.0 0.1]
+    :dead false
     :draw (fn [self] (jaylib/draw-text (self :type) ;(map math/round (self :position)) 12 :green))
     :update (fn [self state]
-              # (pp self)
-              # (pp (self :position))
-              # (pp (self :velocity))
               (v/v+= (self :position) (self :velocity)))
+
     # TODO: kill
     # :kill (fn [self] (set (state :entities)
     #                       (filter (state :entities)

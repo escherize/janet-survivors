@@ -3,17 +3,16 @@
 (import /v)
 (import /config)
 (import /entities/player)
+(import /entities/default)
 (import /entities/enemy)
 (use judge)
 
 (math/seedrandom (os/cryptorand 8))
 
 # Reminder: make things mutable or you cannot change them.
-(def state @{:game-over false :entities (array/new 1000)})
-
-# The entire game is built on entities. Player / enemies / bullets and even damage numbers are entities.
-(defn add-entity [entity &opt id]
-  (array/push (state :entities) entity))
+(def state @{:game-over false
+             :frame-count 0
+             :entities (array/new 1000)})
 
 (defn draw-text-centered [text &opt font-size]
   (default font-size 48)
@@ -36,20 +35,34 @@
                       :white)))
 
 (defn update-state []
-  (loop [entity :in (state :entities)]
-    (pp ["Update |" entity])
-    (:update entity state)))
+
+  (loop [entity
+         :in (state :entities)
+         :when (not (entity :dead))]
+    #(pp ["Update |" entity])
+    (:update entity state))
+  (++ (state :frame-count)))
 
 (defn draw []
   (jaylib/begin-drawing)
   (jaylib/clear-background :black)
 
-  (loop [entity :in (state :entities)]
+  (loop [entity
+         :in (state :entities)
+         :when (not (entity :dead))]
     (:draw entity))
+
+  (loop [entity
+         :in (state :entities)
+         :when (entity :dead)]
+    (put entity :type "dead"))
 
   # TODO
   # (cond (state :won) (draw-text-centered "you win")
   #       (not (state :alive)) (draw-text-centered "game over"))
+
+  (jaylib/draw-text (string "fps: " (jaylib/get-fps))  10 10 8 :white)
+  (jaylib/draw-text (string "frm: " (state :frame-count)) 10 20 8 :white)
   (jaylib/end-drawing))
 
 (var player @{})
@@ -57,21 +70,17 @@
 (defn my-init []
   (set player (player/spawn))
   (put state :player player)
-  (add-entity player)
+  (array/push (state :entities) player)
 
-  (add-entity (enemy/spawn @[20 20]))
-  (add-entity (enemy/spawn @[20 20]))
-  (add-entity (enemy/spawn @[20 20]))
-  (add-entity (enemy/spawn @[20 20]))
-  (add-entity (enemy/spawn @[20 20]))
-  (add-entity (enemy/spawn @[20 20]))
-  (add-entity (enemy/spawn @[20 20]))
-  (add-entity (enemy/spawn @[20 20]))
-  (add-entity (enemy/spawn @[120 520] :color :red)))
+  (loop [pos :in [@[20 20] @[20 520]
+                  @[520 20] @[520 520]]]
+        (->> (enemy/spawn pos :color :green :speed 1)
+             (array/push (state :entities)))))
 
 (defn engine/loop [init-fn update-fn draw-fn width height window-title]
   (jaylib/init-window width height window-title)
   (jaylib/set-target-fps 60)
+
   (init-fn)
   (while (not (jaylib/window-should-close))
     (update-fn)

@@ -1,5 +1,8 @@
 (use judge)
 
+(defn ->array [t]
+  (array/insert (array/new (length t)) 0 ;t))
+
 (defn v+ [[x1 y1] [x2 y2]] [(+ x1 x2) (+ y1 y2)])
 (test (v+ [-5 0] [0 5]) [-5 5])
 
@@ -39,9 +42,7 @@
   (set (a1 0) (clamp (v-lo 0) (v-hi 0) (a1 0)))
   (set (a1 1) (clamp (v-lo 1) (v-hi 1) (a1 1))))
 
-(defn normalize [[x y]]
-  (let [mag (math/sqrt (+ (* x x) (* y y)))]
-    @[(/ x mag) (/ y mag)]))
+
 
 (test
  (do (var arr @[1 1])
@@ -49,21 +50,24 @@
      arr)
  @[11 11])
 
-(defn vdist [[x1 y1] [x2 y2]] (math/sqrt
-                               (+ (math/pow (- x1 x2) 2)
-                                  (math/pow (- y1 y2) 2))))
-(test (vdist [0 0] [3 4]) 5)
-(test (vdist [0 0] [0 40]) 40)
-(test (vdist [0 0] [0 40]) 40)
+(defn d [[x1 y1] [x2 y2]] (+ (math/pow (- x1 x2) 2) (math/pow (- y1 y2) 2)))
 
-(defn vector-to [[x1 y1] [x2 y2] speed]
+(test (d [0 0] [3 4]) 25)
+
+(defn distance [a1 a2] (math/sqrt (d a1 a2)))
+(test (distance [0 0] [3 4]) 5)
+(test (distance [0 0] [0 40]) 40)
+(test (distance [0 0] [0 40]) 40)
+
+(defn normalize [[x y]]
+  (let [mag (math/sqrt (+ (* x x) (* y y)))]
+    @[(/ x mag) (/ y mag)]))
+
+(defn vector-to [[x1 y1] [x2 y2] &opt speed]
+  (default speed 1)
   (let [y-diff (- y1 y2)
-        x-diff (- x1 x2)
-        d (math/sqrt (+ (* y-diff y-diff) (* x-diff x-diff)))
-        # if you want proportional to distance, like gravity: speed-multiplier (/ speed d)
-       ]
-    (array/insert (array/new 2) 0
-                  ;(v* (normalize [x-diff y-diff]) [speed speed]))))
+        x-diff (- x1 x2)]
+    (v* (normalize [x-diff y-diff]) [speed speed])))
 
 (test
- (do (def [x y] (vector-to [0 0] [3 4] 5)) [x y]) [-3 -4])
+ (vector-to [0 0] [0 1]) @[0 -1])
