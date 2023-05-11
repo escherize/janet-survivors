@@ -36,9 +36,8 @@
      :position pos
      :color :gray
      :velocity velocity
-     :lifespan 30
+     :lifespan 150
      :dead false
-     :jitter 5
      :draw draw
      :update update}
    (table/setproto (default/default))))

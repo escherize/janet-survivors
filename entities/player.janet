@@ -93,7 +93,7 @@
         :width 20
         :height 34
         :accel 0.45
-        :aspd 20
+        :aspd 30
         :max-hp 50
         :hp 50
         :dead false

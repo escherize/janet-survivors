@@ -34,7 +34,18 @@
                       font-size
                       :white)))
 
+(var spawn-timer 1000)
+
 (defn update-state []
+
+  (when (= 0 (% spawn-timer (state :frame-count)))
+    (loop [pos :in [@[20 20]
+                    @[20 (- config/screen-height 20)]
+                    @[(- config/screen-width 20) 20]
+                    @[(- config/screen-width 20) (- config/screen-height 20)]]]
+      (->> (enemy/spawn pos :color :green :speed 1)
+           (array/push (state :entities))))
+    (-- spawn-timer))
 
   (loop [entity
          :in (state :entities)
@@ -61,6 +72,8 @@
   # (cond (state :won) (draw-text-centered "you win")
   #       (not (state :alive)) (draw-text-centered "game over"))
 
+
+
   (jaylib/draw-text (string "fps: " (jaylib/get-fps))  10 10 8 :white)
   (jaylib/draw-text (string "frm: " (state :frame-count)) 10 20 8 :white)
   (jaylib/end-drawing))
@@ -71,11 +84,8 @@
   (set player (player/spawn))
   (put state :player player)
   (array/push (state :entities) player)
-
-  (loop [pos :in [@[20 20] @[20 520]
-                  @[520 20] @[520 520]]]
-        (->> (enemy/spawn pos :color :green :speed 1)
-             (array/push (state :entities)))))
+  (->> (enemy/spawn @[200 5000] :color :green :speed 1)
+       (array/push (state :entities))))
 
 (defn engine/loop [init-fn update-fn draw-fn width height window-title]
   (jaylib/init-window width height window-title)
