@@ -29,7 +29,9 @@
   )
 
 (defn update [e state]
-  (when (<= (e :hp) 0) (set (e :dead) true))
+  (when (<= (e :hp) 0)
+    (set (e :dead) true)
+    (++ (state :kill-count)))
   #(pp ["? " (state :player)])
   (set (e :velocity)
        (u/->array (v/vector-to ((state :player) :position)

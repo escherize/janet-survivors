@@ -12,10 +12,12 @@
 # Reminder: make things mutable or you cannot change them.
 (def state @{:game-over false
              :frame-count 0
+             :kill-count 0
+             :won false
              :entities (array/new 1000)})
 
 (defn draw-text-centered [text &opt font-size]
-  (default font-size 48)
+  (default font-size 64)
   (let [text-width (jaylib/measure-text text font-size)]
     (jaylib/draw-text text
                       (math/floor (- (/ config/screen-width 2) (/ text-width 2)))
@@ -34,18 +36,18 @@
                       font-size
                       :white)))
 
-(var spawn-timer 1000)
+(var spawn-timer 400)
 
 (defn update-state []
 
-  (when (= 0 (% spawn-timer (state :frame-count)))
+  (when (= 0 (% (state :frame-count) spawn-timer))
     (loop [pos :in [@[20 20]
                     @[20 (- config/screen-height 20)]
                     @[(- config/screen-width 20) 20]
                     @[(- config/screen-width 20) (- config/screen-height 20)]]]
-      (->> (enemy/spawn pos :color :green :speed 1)
+      (->> (enemy/spawn pos :color :green :speed 2)
            (array/push (state :entities))))
-    (-- spawn-timer))
+    (-= spawn-timer 5))
 
   (loop [entity
          :in (state :entities)
@@ -53,6 +55,8 @@
     #(pp ["Update |" entity])
     (:update entity state))
   (++ (state :frame-count)))
+
+(var player @{})
 
 (defn draw []
   (jaylib/begin-drawing)
@@ -66,19 +70,15 @@
   (loop [entity
          :in (state :entities)
          :when (entity :dead)]
-    (put entity :type "dead"))
+    (put entity :type (string "dead_" (entity :type))))
 
-  # TODO
-  # (cond (state :won) (draw-text-centered "you win")
-  #       (not (state :alive)) (draw-text-centered "game over"))
-
-
+  (cond (state :won) (draw-text-centered "you win")
+        (player :dead) (draw-text-centered "game over"))
 
   (jaylib/draw-text (string "fps: " (jaylib/get-fps))  10 10 8 :white)
   (jaylib/draw-text (string "frm: " (state :frame-count)) 10 20 8 :white)
+  (jaylib/draw-text (string "kills: " (state :kill-count)) (- config/screen-width 120) 10 8 :white)
   (jaylib/end-drawing))
-
-(var player @{})
 
 (defn my-init []
   (set player (player/spawn))

@@ -55,8 +55,8 @@
           direction (v/vector-to (closest :position) (player :position) 1)]
       (array/push (state :entities)
                   (bullet/spawn
-                   (u/->array (player :position))
-                   :velocity (u/->array direction))))))
+                   (u/->array (v/v+ (player :position) [0 (math/round (* (player :height) -0.25))]))
+                   :velocity (u/->array (v/v* direction (player :bullet-speed))))))))
 
 (defn update [player state]
   (when (jaylib/key-down? :up   ) (v/v-= (player :velocity) [0 (player :accel)]))
@@ -67,8 +67,9 @@
   (fire-weapons! player state)
 
   (when (enemy-collides? player state)
-    (pp "ouch")
-    (-- (player :hp)))
+    (-- (player :hp))
+    (when (< 0 (player :hp))
+      (put player :dead true)))
 
   # enforce max velocity
   (v/v-clamp-=
@@ -93,10 +94,11 @@
         :width 20
         :height 34
         :accel 0.45
-        :aspd 30
+        :aspd 10
         :max-hp 50
         :hp 50
         :dead false
+        :bullet-speed @[4 4]
         :max-velocity @[3 3.5]
         :friction @[0.95 0.95]
         :position @[(/ config/screen-width 2)
