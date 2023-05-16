@@ -16,9 +16,9 @@
 
 (defn get-collisions-when [entity-pred state self-position]
   (filter (fn [e]
-            (pp e)
-            (pp (e :type))
-            (pp (entity-pred e))
+            # (pp e)
+            # (pp (e :type))
+            # (pp (entity-pred e))
             (and (entity-pred e)
                  (< (v/distance self-position (e :position))
                     (:collision-dist e))))

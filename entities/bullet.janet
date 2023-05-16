@@ -20,7 +20,7 @@
                                              (= "spawner" t)))
                                       state
                                       (self :position))]
-    (:apply-damage e (self :damage))
+    (:apply-damage e (self :damage) state)
     (:kill self))
 
   # move

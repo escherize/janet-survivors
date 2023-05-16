@@ -1,6 +1,7 @@
 (import ../util :as u)
 (import ../v)
 (import /entities/default)
+(import /entities/floating_num)
 (import /entities/enemy)
 (import jaylib)
 (use judge)
@@ -57,9 +58,16 @@
      :rate rate
      :max-hp 10
      :hp 10
+     :attack 10
      :dead false
      :collision-dist (fn [self] (self :width))
-     :apply-damage (fn [self amount] (-= (self :hp) amount))
+     :apply-damage (fn [self amount state]
+                     (-= (self :hp) amount)
+                     (array/push (state :entities)
+                                 (floating_num/spawn (u/->array
+                                                      (v/v- (self :position) [0 (:collision-dist self)]))
+                                                     (string amount)
+                                                     :white)))
      :draw draw
      :update update}
    (table/setproto (default/default))))

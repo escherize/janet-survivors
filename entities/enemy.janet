@@ -2,11 +2,9 @@
 (import ../v)
 (import ../util :as u)
 (import /entities/default)
+(import /entities/floating_num)
 (import ../config)
 (use judge)
-
-
-
 
 (defn draw [{:position [x y] :r r :color color :hp hp :max-hp max-hp}]
   (jaylib/draw-circle (math/round x) (math/round y) r color)
@@ -19,12 +17,13 @@
      (math/round (* 2 r))
      4
      :gray)
-    (jaylib/draw-rectangle
-     (math/round (- x r))
-     (math/round (- y (* 1.7 r)))
-     (math/round (* r 2 (- 1 (u/pct-diff max-hp hp))))
-     2
-     :red))
+    (when (not= hp 0)
+      (jaylib/draw-rectangle
+       (math/round (- x r))
+       (math/round (- y (* 1.7 r)))
+       (math/round (* r 2 (- 1 (u/pct-diff max-hp hp))))
+       2
+       :red)))
   #(jaylib/draw-text (string hp) (math/round (+ 10 x)) (math/round (+ 10 y)) 10 :white)
   )
 
@@ -62,11 +61,18 @@
      :velocity @[1.0 1.0]
      :jitter 0.5
      :speed speed
-     :max-hp 10
-     :hp 10
+     :max-hp 5
+     :hp 5
+     :attack 1
      :dead false
      :collision-dist (fn [self] (self :r))
      :draw draw
      :update update
-     :apply-damage (fn [self amount] (-= (self :hp) amount))}
+     :apply-damage (fn [self amount state]
+                     (-= (self :hp) amount)
+                     (array/push (state :entities)
+                                 (floating_num/spawn (u/->array
+                                                      (v/v- (self :position) [0 (:collision-dist self)]))
+                                                     (string amount)
+                                                     :white)))}
    (table/setproto (default/default))))
