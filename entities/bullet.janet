@@ -12,15 +12,16 @@
 
 (defn update [self state]
   (when (< (-- (self :lifespan)) 0)
-    (set (self :dead) true))
+    (:kill self))
 
   # damage enemies
-  (loop [e :in (u/get-collisions-for-type "enemy"
-                                          state
-                                          (self :position)
-                                          (fn [e] (+ (self :r) (e :r))))]
-    (set (self :dead) true)
-    (:apply-damage e (self :damage)))
+  (loop [e :in (u/get-collisions-when |(let [t ($ :type)]
+                                         (or (= "enemy" t)
+                                             (= "spawner" t)))
+                                      state
+                                      (self :position))]
+    (:apply-damage e (self :damage))
+    (:kill self))
 
   # move
   (v/v+= (self :position) (self :velocity)))
@@ -38,6 +39,7 @@
      :velocity velocity
      :lifespan 150
      :dead false
+     :collision-dist (fn [self] (self :r))
      :draw draw
      :update update}
    (table/setproto (default/default))))

@@ -5,6 +5,7 @@
 (import /entities/player)
 (import /entities/default)
 (import /entities/enemy)
+(import /entities/spawner)
 (use judge)
 
 (math/seedrandom (os/cryptorand 8))
@@ -39,20 +40,19 @@
 (var spawn-timer 400)
 
 (defn update-state []
-
-  (when (= 0 (% (state :frame-count) spawn-timer))
-    (loop [pos :in [@[20 20]
-                    @[20 (- config/screen-height 20)]
-                    @[(- config/screen-width 20) 20]
-                    @[(- config/screen-width 20) (- config/screen-height 20)]]]
-      (->> (enemy/spawn pos :color :green :speed 2)
-           (array/push (state :entities))))
-    (-= spawn-timer 5))
+  
+  # (when (= 0 (% (state :frame-count) spawn-timer))
+  #   (loop [pos :in [@[20 20]
+  #                   @[20 (- config/screen-height 20)]
+  #                   @[(- config/screen-width 20) 20]
+  #                   @[(- config/screen-width 20) (- config/screen-height 20)]]]
+  #     (->> (enemy/spawn pos :color :green :speed 2)
+  #          (array/push (state :entities))))
+  #   (-= spawn-timer 5))
 
   (loop [entity
          :in (state :entities)
          :when (not (entity :dead))]
-    #(pp ["Update |" entity])
     (:update entity state))
   (++ (state :frame-count)))
 
@@ -67,11 +67,6 @@
          :when (not (entity :dead))]
     (:draw entity))
 
-  (loop [entity
-         :in (state :entities)
-         :when (entity :dead)]
-    (put entity :type (string "dead_" (entity :type))))
-
   (cond (state :won) (draw-text-centered "you win")
         (player :dead) (draw-text-centered "game over"))
 
@@ -84,8 +79,9 @@
   (set player (player/spawn))
   (put state :player player)
   (array/push (state :entities) player)
-  (->> (enemy/spawn @[200 5000] :color :green :speed 1)
-       (array/push (state :entities))))
+  (->> (enemy/spawn @[200 5000] :color :green :speed 0.01)
+       (array/push (state :entities)))
+  (array/push (state :entities) (spawner/spawn @[300 300] :rate 50)))
 
 (defn engine/loop [init-fn update-fn draw-fn width height window-title]
   (jaylib/init-window width height window-title)

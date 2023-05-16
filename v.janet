@@ -42,8 +42,6 @@
   (set (a1 0) (clamp (v-lo 0) (v-hi 0) (a1 0)))
   (set (a1 1) (clamp (v-lo 1) (v-hi 1) (a1 1))))
 
-
-
 (test
  (do (var arr @[1 1])
      (v+= arr [10 10])
@@ -65,9 +63,10 @@
 
 (defn vector-to [[x1 y1] [x2 y2] &opt speed]
   (default speed 1)
-  (let [y-diff (- y1 y2)
-        x-diff (- x1 x2)]
-    (v* (normalize [x-diff y-diff]) [speed speed])))
+  (let [y-diff (- y2 y1) x-diff (- x2 x1)]
+    (if (= [0 0] [x-diff y-diff])
+      [0 0]
+      (v* (normalize [x-diff y-diff]) [speed speed]))))
 
 (test
- (vector-to [0 0] [0 1]) @[0 -1])
+ (vector-to [0 0] [0 1]) [0 1])
